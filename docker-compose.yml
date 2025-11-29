@@ -1,0 +1,43 @@
+
+
+services:
+  # 1. PostgreSQL Database Service
+  postgres_db:
+    image: postgres:14-alpine
+    container_name: ems_postgres_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-ems_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  # 2. FastAPI Backend Service
+  backend:
+    build:
+      context: ./event-management-system 
+      dockerfile: Dockerfile
+    container_name: ems_backend
+    env_file:
+      - .env
+    depends_on:
+      - postgres_db 
+    ports:
+      - "8000:8000" 
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres_user}:${POSTGRES_PASSWORD:-secure_password}@postgres_db/${POSTGRES_DB:-ems_db}
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # 3. React Frontend Service
+  frontend:
+    build:
+      context: ./event-management-frontend 
+      dockerfile: Dockerfile
+    container_name: ems_frontend
+    depends_on:
+      - backend 
+    ports:
+      - "3000:80" 
+
+volumes:
+  postgres_data:

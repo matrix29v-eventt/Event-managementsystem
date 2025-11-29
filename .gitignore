@@ -1,0 +1,23 @@
+﻿# ----------------------------------------
+# Global .gitignore for Event Management Monorepo
+# ----------------------------------------
+
+# 1. PYTHON / FASTAPI BACKEND FILES (Inside event-management-system/)
+event-management-system/venv/         # Virtual environments
+event-management-system/.venv/
+event-management-system/__pycache__/  # Python compiled files
+event-management-system/*.pyc
+event-management-system/.env          # IMPORTANT: Local environment secrets
+event-management-system/.vscode/      # IDE settings
+event-management-system/.idea/
+
+# 2. NODE / REACT FRONTEND FILES (Inside event-management-frontend/)
+event-management-frontend/node_modules/ # JavaScript dependencies
+event-management-frontend/build/        # Production compiled output
+event-management-frontend/dist/
+event-management-frontend/npm-debug.log*
+
+# 3. GLOBAL/OS FILES
+.vscode/
+.idea/
+Thumbs.db

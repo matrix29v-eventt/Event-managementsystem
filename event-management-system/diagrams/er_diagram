@@ -1,0 +1,21 @@
+// Event Management System ER Diagram
+digraph {
+	Client [label="Client
+(id, name, email, phone)"]
+	Venue [label="Venue
+(id, name, location, capacity)"]
+	Vendor [label="Vendor
+(id, name, service_type, contact)"]
+	Event [label="Event
+(id, name, date, client_id, venue_id)"]
+	Booking [label="Booking
+(id, event_id, vendor_id, service_cost)"]
+	Payment [label="Payment
+(id, event_id, booking_id, amount, method, status, date)"]
+	Client -> Event [label="1 : N"]
+	Venue -> Event [label="1 : N"]
+	Event -> Booking [label="1 : N"]
+	Vendor -> Booking [label="1 : N"]
+	Event -> Payment [label="1 : N"]
+	Booking -> Payment [label="0..1 : N"]
+}
