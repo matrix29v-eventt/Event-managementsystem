@@ -32,10 +32,14 @@ jobs:
       - name: Compute image tags
         id: meta
         run: |
+          # GHCR/Docker references must be lowercase, but github.repository
+          # preserves the repo's original casing (e.g. .../Event-managementsystem).
+          IMAGE_LOWER="$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')"
+          echo "name=${IMAGE_LOWER}" >> "$GITHUB_OUTPUT"
           if [ -n "${{ inputs.image_tag }}" ]; then
             echo "image=${{ inputs.image_tag }}" >> "$GITHUB_OUTPUT"
           else
-            echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            echo "image=${{ env.REGISTRY }}/${IMAGE_LOWER}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Log in to GHCR
@@ -55,7 +59,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.meta.outputs.image }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.name }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

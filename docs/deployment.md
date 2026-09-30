@@ -20,6 +20,8 @@ prod safeguards (`restart: always`, stricter intervals, required `CORS_ORIGINS`,
   environment for human convenience only. Rollback and deploy scripts always use
   the SHA tag recorded in `.prev_image_tag` / `.last_good_image`.
 - Never deploy `:latest` alone to production: it is not reproducible.
+- All refs are lowercased by CI (`tr A-Z a-z`) because Docker/GHCR rejects
+  uppercase in repository paths while `github.repository` preserves repo casing.
 
 ## Registry (GHCR) + local fallback
 

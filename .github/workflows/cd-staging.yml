@@ -32,7 +32,11 @@ jobs:
       - name: Compute image tags
         id: meta
         run: |
-          SHA_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          # GHCR/Docker references must be lowercase, but github.repository
+          # preserves the repo's original casing (e.g. .../Event-managementsystem).
+          IMAGE_LOWER="$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')"
+          echo "name=${IMAGE_LOWER}" >> "$GITHUB_OUTPUT"
+          SHA_TAG="${{ env.REGISTRY }}/${IMAGE_LOWER}:${{ github.sha }}"
           echo "image=${SHA_TAG}" >> "$GITHUB_OUTPUT"
           echo "Deploying image: ${SHA_TAG}"
 
@@ -53,7 +57,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.meta.outputs.image }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.name }}:staging
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
