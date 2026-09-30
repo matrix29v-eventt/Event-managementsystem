@@ -1,4 +1,3 @@
-import pytest
 from datetime import date, timedelta
 from tests.test_utils import get_admin_headers, get_client_headers, get_unauthorized_headers
 
@@ -31,10 +30,11 @@ def test_2_client_cannot_create_event_for_admin(client):
     response = client.post("/events/", json=bad_data, headers=headers)
     assert response.status_code == 403
 
-def test_3_admin_cannot_create_event(client):
+def test_3_admin_can_create_event(client):
     headers = get_admin_headers(client)
+    # Admin is allowed to create events on behalf of any client (see app/routers/events.py:20)
     response = client.post("/events/", json=VALID_EVENT_DATA, headers=headers)
-    assert response.status_code == 403
+    assert response.status_code == 201
 
 def test_4_client_can_read_own_event(client):
     headers = get_client_headers(client)

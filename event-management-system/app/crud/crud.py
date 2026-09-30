@@ -6,7 +6,7 @@
 # from app.schemas.schemas import ClientCreate, VenueCreate, VendorCreate, EventCreate, BookingCreate, PaymentCreate
 # from passlib.context import CryptContext
 # # 💡 FIX: Ensure datetime and timezone are imported for V2 compatibility
-# from datetime import datetime, timezone 
+# from datetime import datetime, timezone
 
 # # Password Hashing Context
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -153,7 +153,7 @@
 #         method=payment.method,
 #         status=payment.status,
 #         # 💡 FIX 2: Use 'date' which is the model's column name (not payment_date)
-#         date=payment.date 
+#         date=payment.date
 #     )
 #     db.add(db_payment)
 #     db.commit()
@@ -167,19 +167,28 @@
 # app/crud/crud.py
 from sqlalchemy.orm import Session
 from app.models.models import Client, Venue, Vendor, Event, Booking, Payment
-from app.schemas.schemas import ClientCreate, VenueCreate, VendorCreate, EventCreate, BookingCreate, PaymentCreate
+from app.schemas.schemas import (
+    ClientCreate,
+    VenueCreate,
+    VendorCreate,
+    EventCreate,
+    BookingCreate,
+    PaymentCreate,
+)
 from passlib.context import CryptContext
-from datetime import datetime, timezone 
 
 # Password Hashing Context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 # Hashing utility functions
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
+
 
 # ==========================
 # CLIENT CRUD
@@ -187,8 +196,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_client(db: Session, client_id: int):
     return db.query(Client).filter(Client.id == client_id).first()
 
+
 def get_client_by_email(db: Session, email: str):
-    return db.query(Client).filter(Client.email == email).first() 
+    return db.query(Client).filter(Client.email == email).first()
+
 
 def create_client(db: Session, client: ClientCreate, role: str = "client"):
     hashed_pass = hash_password(client.password)
@@ -197,15 +208,40 @@ def create_client(db: Session, client: ClientCreate, role: str = "client"):
         email=client.email,
         phone=client.phone,
         hashed_password=hashed_pass,
-        role=role
+        role=role,
     )
     db.add(db_client)
     db.commit()
     db.refresh(db_client)
     return db_client
 
+
 def get_clients(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Client).offset(skip).limit(limit).all()
+
+
+def update_client(db: Session, client_id: int, client_data: dict):
+    db_client = db.query(Client).filter(Client.id == client_id).first()
+    if not db_client:
+        return None
+    for key, value in client_data.items():
+        if value is not None:
+            if key == "password":
+                setattr(db_client, "hashed_password", hash_password(value))
+            else:
+                setattr(db_client, key, value)
+    db.commit()
+    db.refresh(db_client)
+    return db_client
+
+
+def delete_client(db: Session, client_id: int):
+    db_client = db.query(Client).filter(Client.id == client_id).first()
+    if not db_client:
+        return False
+    db.delete(db_client)
+    db.commit()
+    return True
 
 
 # ==========================
@@ -214,19 +250,38 @@ def get_clients(db: Session, skip: int = 0, limit: int = 100):
 def get_venue(db: Session, venue_id: int):
     return db.query(Venue).filter(Venue.id == venue_id).first()
 
+
 def create_venue(db: Session, venue: VenueCreate):
-    db_venue = Venue(
-        name=venue.name,
-        location=venue.location,
-        capacity=venue.capacity
-    )
+    db_venue = Venue(name=venue.name, location=venue.location, capacity=venue.capacity)
     db.add(db_venue)
     db.commit()
     db.refresh(db_venue)
     return db_venue
 
+
 def get_venues(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Venue).offset(skip).limit(limit).all()
+
+
+def update_venue(db: Session, venue_id: int, venue_data: dict):
+    db_venue = db.query(Venue).filter(Venue.id == venue_id).first()
+    if not db_venue:
+        return None
+    for key, value in venue_data.items():
+        if value is not None:
+            setattr(db_venue, key, value)
+    db.commit()
+    db.refresh(db_venue)
+    return db_venue
+
+
+def delete_venue(db: Session, venue_id: int):
+    db_venue = db.query(Venue).filter(Venue.id == venue_id).first()
+    if not db_venue:
+        return False
+    db.delete(db_venue)
+    db.commit()
+    return True
 
 
 # ==========================
@@ -235,19 +290,40 @@ def get_venues(db: Session, skip: int = 0, limit: int = 100):
 def get_vendor(db: Session, vendor_id: int):
     return db.query(Vendor).filter(Vendor.id == vendor_id).first()
 
+
 def create_vendor(db: Session, vendor: VendorCreate):
     db_vendor = Vendor(
-        name=vendor.name,
-        service_type=vendor.service_type,
-        contact=vendor.contact
+        name=vendor.name, service_type=vendor.service_type, contact=vendor.contact
     )
     db.add(db_vendor)
     db.commit()
     db.refresh(db_vendor)
     return db_vendor
 
+
 def get_vendors(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Vendor).offset(skip).limit(limit).all()
+
+
+def update_vendor(db: Session, vendor_id: int, vendor_data: dict):
+    db_vendor = db.query(Vendor).filter(Vendor.id == vendor_id).first()
+    if not db_vendor:
+        return None
+    for key, value in vendor_data.items():
+        if value is not None:
+            setattr(db_vendor, key, value)
+    db.commit()
+    db.refresh(db_vendor)
+    return db_vendor
+
+
+def delete_vendor(db: Session, vendor_id: int):
+    db_vendor = db.query(Vendor).filter(Vendor.id == vendor_id).first()
+    if not db_vendor:
+        return False
+    db.delete(db_vendor)
+    db.commit()
+    return True
 
 
 # ==========================
@@ -256,20 +332,32 @@ def get_vendors(db: Session, skip: int = 0, limit: int = 100):
 def get_event(db: Session, event_id: int):
     return db.query(Event).filter(Event.id == event_id).first()
 
+
 def create_event(db: Session, event: EventCreate):
     db_event = Event(
         name=event.name,
         date=event.date,
         client_id=event.client_id,
-        venue_id=event.venue_id
+        venue_id=event.venue_id,
     )
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
     return db_event
 
+
 def get_events(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Event).offset(skip).limit(limit).all()
+
+
+def get_events_by_client(db: Session, client_id: int, skip: int = 0, limit: int = 100):
+    return (
+        db.query(Event)
+        .filter(Event.client_id == client_id)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 # ==========================
@@ -278,38 +366,47 @@ def get_events(db: Session, skip: int = 0, limit: int = 100):
 def get_booking(db: Session, booking_id: int):
     return db.query(Booking).filter(Booking.id == booking_id).first()
 
+
 def create_booking(db: Session, booking: BookingCreate):
     db_booking = Booking(
         event_id=booking.event_id,
         vendor_id=booking.vendor_id,
-        service_cost=booking.service_cost
+        service_cost=booking.service_cost,
     )
     db.add(db_booking)
     db.commit()
     db.refresh(db_booking)
     return db_booking
 
+
 def get_bookings(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Booking).offset(skip).limit(limit).all()
 
-def get_bookings_by_client_id(db: Session, client_id: int, skip: int = 0, limit: int = 100):
+
+def get_bookings_by_client_id(
+    db: Session, client_id: int, skip: int = 0, limit: int = 100
+):
     """Retrieves detailed booking information specific to the client."""
-    
+
     # 💡 FIX: Join multiple tables to get names and details
-    query = db.query(
-        Booking.id.label("booking_id"),
-        Booking.service_cost,
-        Event.name.label("event_name"),
-        Event.date.label("event_date"),
-        Venue.name.label("venue_name"),
-        Vendor.name.label("vendor_name"),
-        Vendor.service_type
-    ).join(Event, Booking.event_id == Event.id)\
-     .join(Venue, Event.venue_id == Venue.id)\
-     .join(Vendor, Booking.vendor_id == Vendor.id)\
-     .filter(Event.client_id == client_id)\
-     .offset(skip).limit(limit)
-     
+    query = (
+        db.query(
+            Booking.id.label("booking_id"),
+            Booking.service_cost,
+            Event.name.label("event_name"),
+            Event.date.label("event_date"),
+            Venue.name.label("venue_name"),
+            Vendor.name.label("vendor_name"),
+            Vendor.service_type,
+        )
+        .join(Event, Booking.event_id == Event.id)
+        .join(Venue, Event.venue_id == Venue.id)
+        .join(Vendor, Booking.vendor_id == Vendor.id)
+        .filter(Event.client_id == client_id)
+        .offset(skip)
+        .limit(limit)
+    )
+
     return query.all()
 
 
@@ -319,6 +416,7 @@ def get_bookings_by_client_id(db: Session, client_id: int, skip: int = 0, limit:
 def get_payment(db: Session, payment_id: int):
     return db.query(Payment).filter(Payment.id == payment_id).first()
 
+
 def create_payment(db: Session, payment: PaymentCreate):
     db_payment = Payment(
         event_id=payment.event_id,
@@ -326,38 +424,79 @@ def create_payment(db: Session, payment: PaymentCreate):
         amount=payment.amount,
         method=payment.method,
         status=payment.status,
-        date=payment.date 
+        date=payment.date,
     )
     db.add(db_payment)
     db.commit()
     db.refresh(db_payment)
     return db_payment
 
+
 def get_payments(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Payment).offset(skip).limit(limit).all()
 
+
+def update_payment(db: Session, payment_id: int, payment_data: dict):
+    db_payment = db.query(Payment).filter(Payment.id == payment_id).first()
+    if not db_payment:
+        return None
+    for key, value in payment_data.items():
+        if value is not None:
+            setattr(db_payment, key, value)
+    db.commit()
+    db.refresh(db_payment)
+    return db_payment
+
+
+def delete_payment(db: Session, payment_id: int):
+    db_payment = db.query(Payment).filter(Payment.id == payment_id).first()
+    if not db_payment:
+        return False
+    db.delete(db_payment)
+    db.commit()
+    return True
+
+
+def get_payments_by_event(db: Session, event_id: int):
+    return db.query(Payment).filter(Payment.event_id == event_id).all()
+
+
+def get_payments_by_client(db: Session, client_id: int):
+    return (
+        db.query(Payment)
+        .join(Event, Payment.event_id == Event.id)
+        .filter(Event.client_id == client_id)
+        .all()
+    )
+
+
 def get_all_bookings_details(db: Session, skip: int = 0, limit: int = 100):
     """Retrieves detailed booking information including client and event data."""
-    
+
     # 💡 Query joins Bookings, Events, and Clients
-    query = db.query(
-        Booking.id.label("booking_id"),
-        Booking.service_cost,
-        Event.id.label("event_id"),
-        Event.name.label("event_name"),
-        Event.date.label("event_date"),
-        Client.id.label("client_id"),
-        Client.name.label("client_name"),
-        Client.email.label("client_email"),
-        Vendor.name.label("vendor_name"),
-        Vendor.service_type
-    ).join(Event, Booking.event_id == Event.id)\
-     .join(Client, Event.client_id == Client.id)\
-     .join(Vendor, Booking.vendor_id == Vendor.id)\
-     .offset(skip).limit(limit)
-     
+    query = (
+        db.query(
+            Booking.id.label("booking_id"),
+            Booking.service_cost,
+            Event.id.label("event_id"),
+            Event.name.label("event_name"),
+            Event.date.label("event_date"),
+            Client.id.label("client_id"),
+            Client.name.label("client_name"),
+            Client.email.label("client_email"),
+            Vendor.name.label("vendor_name"),
+            Vendor.service_type,
+        )
+        .join(Event, Booking.event_id == Event.id)
+        .join(Client, Event.client_id == Client.id)
+        .join(Vendor, Booking.vendor_id == Vendor.id)
+        .offset(skip)
+        .limit(limit)
+    )
+
     # Return as SQLAlchemy Row objects (which FastAPI will convert to JSON)
     return query.all()
+
 
 def delete_booking(db: Session, booking_id: int):
     db_booking = db.query(Booking).filter(Booking.id == booking_id).first()
@@ -366,5 +505,3 @@ def delete_booking(db: Session, booking_id: int):
         db.commit()
         return True
     return False
-
-

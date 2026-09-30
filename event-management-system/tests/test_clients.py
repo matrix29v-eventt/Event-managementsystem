@@ -1,6 +1,4 @@
-import pytest
-from app.schemas.schemas import ClientCreate
-from tests.test_utils import get_admin_headers, get_client_headers, get_unauthorized_headers
+from tests.test_utils import get_admin_headers, get_client_headers
 
 # Global Test Data (for login and registration tests)
 TEST_PASSWORD = "testpassword123"

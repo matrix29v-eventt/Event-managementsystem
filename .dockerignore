@@ -1,0 +1,14 @@
+# Root .dockerignore (backend context already has its own file inside
+# event-management-system/.dockerignore; this guards root-context builds).
+.git/
+.github/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+*.db
+.pytest_cache/
+node_modules/
+docs/
+scripts/

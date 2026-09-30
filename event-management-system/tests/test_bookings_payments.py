@@ -1,4 +1,3 @@
-import pytest
 from datetime import date
 from tests.test_utils import get_admin_headers, get_client_headers, get_unauthorized_headers
 

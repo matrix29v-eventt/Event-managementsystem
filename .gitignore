@@ -21,3 +21,15 @@ event-management-frontend/npm-debug.log*
 .vscode/
 .idea/
 Thumbs.db
+.aider*
+.env
+
+# 4. SRE / CI-CD (added)
+.env.staging
+.env.prod
+*.db
+*.log
+.pytest_cache/
+.ruff_cache/
+.last_good_image
+.prev_image_tag

@@ -10,7 +10,7 @@ from datetime import date, timedelta
 # Import your application modules
 from app.db import Base, get_db
 from app.main import app
-from app.models.models import Client, Venue, Vendor, Event, Booking, Payment 
+from app.models.models import Client, Venue, Vendor, Event, Booking 
 from app.crud.crud import hash_password 
 from app.schemas.schemas import ClientCreate
 
@@ -32,11 +32,15 @@ TEST_CLIENT_DATA = {
 # ------------------------------------------------------------------
 # 1. TEST DATABASE SETUP
 # ------------------------------------------------------------------
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL") 
+TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
 if not TEST_DATABASE_URL:
-    raise EnvironmentError("TEST_DATABASE_URL not set in environment variables.")
+    # Fallback to SQLite for local testing when TEST_DATABASE_URL not configured
+    TEST_DATABASE_URL = "sqlite:///./test.db"
+    print(f"WARNING: TEST_DATABASE_URL not set, falling back to {TEST_DATABASE_URL}")
 
-test_engine = create_engine(TEST_DATABASE_URL)
+# SQLite needs check_same_thread=False for FastAPI TestClient
+connect_args = {"check_same_thread": False} if TEST_DATABASE_URL.startswith("sqlite") else {}
+test_engine = create_engine(TEST_DATABASE_URL, connect_args=connect_args)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 def override_get_db():

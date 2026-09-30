@@ -1,5 +1,4 @@
-import pytest
-from tests.test_utils import get_admin_headers, get_client_headers, get_unauthorized_headers
+from tests.test_utils import get_admin_headers, get_client_headers
 
 # NOTE: Venue ID 1 and Vendor ID 1 are created in conftest.py
 VENUE_DATA = {
